@@ -70,13 +70,21 @@ public class EmailService {
 			MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 			//
-			String mailTo = getMailTo(sendmail);
+			String mailTo = getMailTo(sendmail.getEmail());
+			if (StringUtils.isEmpty(mailTo)) {
+				log.info("mail to user not in white list, {}", sendmail.getEmail());
+				return;
+			}
 			helper.setTo(mailTo);
 			helper.setSubject(sendmail.getSubject());
-			String cc = sendmail.getCc();
-			if (null != cc) {
-				helper.setCc(cc);
-			}
+			// String cc = sendmail.getCc();
+			// if (null != cc) {
+			// String[] ccArray = cc.split(",");
+			// for (String ccArr : ccArray) {
+			// getMailTo(ccArr);
+			// }
+			// helper.setCc(cc);
+			// }
 			helper.setText(sendmail.getContent(), true);
 			javaMailSender.send(mimeMessage);
 			log.info("email send success, id = {}, mailTo", id, mailTo);
@@ -95,16 +103,16 @@ public class EmailService {
 		}
 	}
 
-	protected String getMailTo(Sendmail sendmail) {
-		String email = sendmail.getEmail();
-		String defaultEmail = "charles.kou@yamibuy.com";
+	protected String getMailTo(String email) {
+		// String defaultEmail = "charles.kou@yamibuy.com";
 		// 设置收件人，如在白名单中则直接使用
-		if (StringUtils.isNotEmpty(whiteList) && !"${MAIL_WHITE_LIST}".equalsIgnoreCase(whiteList) && whiteList.contains(email.trim())) {
+		if (StringUtils.isNotEmpty(whiteList) && !"${MAIL_WHITE_LIST}".equalsIgnoreCase(whiteList)
+				&& whiteList.contains(email.trim())) {
 			return email;
 		}
 		// 否则发送到默认收件人
-		log.info("替换收件人 {} 为默认收件人 {}", email, defaultEmail);
-		return defaultEmail;
+		// log.info("替换收件人 {} 为默认收件人 {}", email, defaultEmail);
+		return "";
 	}
 
 }
