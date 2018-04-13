@@ -47,7 +47,7 @@ public class EmailService {
 		return emailRepository.findAll();
 	}
 
-	@Scheduled(cron = "0 0/5 * * * ?")
+	@Scheduled(cron = "0 0/1 * * * ?")
 	public void scheduleTask() throws InterruptedException {
 		send();
 	}
@@ -100,7 +100,7 @@ public class EmailService {
 		// 设置收件人，如在白名单中则直接使用
 		List<String> emailList = new ArrayList<>();
 		if (null != email && email.length() > 0) {
-			String[] split = new String[] {};
+			String[] split = new String[1];
 			if (email.contains(",")) {
 				split = email.split(",");
 			} else if (email.contains(";")) {
