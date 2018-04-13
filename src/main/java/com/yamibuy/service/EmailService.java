@@ -1,5 +1,6 @@
 package com.yamibuy.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.mail.internet.MimeMessage;
@@ -77,14 +78,6 @@ public class EmailService {
 			}
 			helper.setTo(mailTo);
 			helper.setSubject(sendmail.getSubject());
-			// String cc = sendmail.getCc();
-			// if (null != cc) {
-			// String[] ccArray = cc.split(",");
-			// for (String ccArr : ccArray) {
-			// getMailTo(ccArr);
-			// }
-			// helper.setCc(cc);
-			// }
 			helper.setText(sendmail.getContent(), true);
 			javaMailSender.send(mimeMessage);
 			log.info("email send success, id = {}, mailTo", id, mailTo);
@@ -104,14 +97,33 @@ public class EmailService {
 	}
 
 	protected String getMailTo(String email) {
-		// String defaultEmail = "charles.kou@yamibuy.com";
 		// 设置收件人，如在白名单中则直接使用
-		if (StringUtils.isNotEmpty(whiteList) && !"${MAIL_WHITE_LIST}".equalsIgnoreCase(whiteList)
-				&& whiteList.contains(email.trim())) {
-			return email;
+		List<String> emailList = new ArrayList<>();
+		if (null != email && email.length() > 0) {
+			String[] split = new String[] {};
+			if (email.contains(",")) {
+				split = email.split(",");
+			} else if (email.contains(";")) {
+				split = email.split(";");
+			} else {
+				split[0] = email;
+			}
+
+			for (String to : split) {
+				if (StringUtils.isNotEmpty(whiteList) && !"${MAIL_WHITE_LIST}".equalsIgnoreCase(whiteList)
+						&& whiteList.contains(to.trim())) {
+					emailList.add(to);
+				}
+			}
+
+			String result = "";
+			for (String string : split) {
+				result += string + ",";
+			}
+
+			return result;
 		}
-		// 否则发送到默认收件人
-		// log.info("替换收件人 {} 为默认收件人 {}", email, defaultEmail);
+
 		return "";
 	}
 
