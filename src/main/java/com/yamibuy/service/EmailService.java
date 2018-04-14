@@ -71,15 +71,17 @@ public class EmailService {
 			MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 			//
-			String mailTo = getMailTo(sendmail.getEmail());
-			if (StringUtils.isEmpty(mailTo)) {
+			List<String> mailTo = getMailTo(sendmail.getEmail());
+			if (mailTo.isEmpty()) {
 				log.info("mail to user not in white list, {}", sendmail.getEmail());
 				return;
 			}
-			helper.setTo(mailTo);
+			String[] emailArray = new String[mailTo.size()];
+			emailArray = mailTo.toArray(emailArray);
+			helper.setTo(emailArray);
 			helper.setSubject(sendmail.getSubject());
 			helper.setText(sendmail.getContent(), true);
-			javaMailSender.send(mimeMessage);
+//			javaMailSender.send(mimeMessage);
 			log.info("email send success, id = {}, mailTo", id, mailTo);
 			sendmail.setCount(Short.MAX_VALUE);
 			emailRepository.update(sendmail);
@@ -96,11 +98,11 @@ public class EmailService {
 		}
 	}
 
-	protected String getMailTo(String email) {
+	public List<String> getMailTo(String email) {
 		// 设置收件人，如在白名单中则直接使用
 		List<String> emailList = new ArrayList<>();
+		String[] split = new String[1];
 		if (null != email && email.length() > 0) {
-			String[] split = new String[1];
 			if (email.contains(",")) {
 				split = email.split(",");
 			} else if (email.contains(";")) {
@@ -115,16 +117,8 @@ public class EmailService {
 					emailList.add(to);
 				}
 			}
-
-			String result = "";
-			for (String string : split) {
-				result += string + ",";
-			}
-
-			return result;
 		}
 
-		return "";
+		return emailList;
 	}
-
 }
